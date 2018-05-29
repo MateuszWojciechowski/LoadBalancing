@@ -69,10 +69,25 @@ public class Event implements Comparable {
         java.lang.System.out.println("Time remaining to empty system: " + System.getTimeRemainingToEmptySystem() + "ms");
         if(eventType == EventType.ARRIVAL) {
             /*
+            1. Check if buffer is not full.
             1. Increase number of events in the system.
             2. Generate departure event.
              */
+
+            //if buffer is full
+            if(System.getBufferState() >= System.getC()) {
+                java.lang.System.out.println("No place in buffer, event rejected!");
+                Statistics.increaseNumberOfRejectedArrivals();
+                Statistics.increaseNumberOfArrivals();
+                return;
+            }
+
             System.increaseNumberOfEventsInSystem();
+            if(System.busy == true)
+                System.increaseBufferState();
+            else
+                System.busy = true;
+
             long newEventDuration = RandomGenerator.getNextExpDist(System.getMu());
 
             Statistics.addToAverageEventTime(newEventDuration);
@@ -87,9 +102,15 @@ public class Event implements Comparable {
             /*
             1. Decrease number of events in the system.
             2. Decrease time remaining to empty system
+            If buffer is null, it was the last event and change busy to false.
              */
             Statistics.increaseNumberOfDepartures();
             System.decreaseNumberOfEventsInSystem();
+
+            if(System.getBufferState() == 0)
+                System.busy = false;
+            else
+                System.decreaseBufferState();
         }
         java.lang.System.out.println("Events in system: " + System.getNumberOfEventsInSystem());
     }

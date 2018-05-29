@@ -1,7 +1,6 @@
 package com.mateuszwojciechowski;
 
 import java.time.Instant;
-import java.util.Collections;
 import java.util.LinkedList;
 
 /**
@@ -13,22 +12,12 @@ public class System {
      */
     private static double lambda = 0;
     /**
-     * Service intensity.
-     */
-    private static double mu = 0;
-    /**
-     * System usage rate.
-     */
-    private static double rho = 0;
-
-    /**
      * Lambda getter.
      * @return lambda parameter
      */
     public static double getLambda() {
         return lambda;
     }
-
     /**
      * Lambda setter.
      * @param lambda lambda parameter
@@ -38,13 +27,16 @@ public class System {
     }
 
     /**
+     * Service intensity.
+     */
+    private static double mu = 0;
+    /**
      * Mu getter.
      * @return mu parameter
      */
     public static double getMu() {
         return mu;
     }
-
     /**
      * Mu setter
      * @param mu mu parameter
@@ -54,12 +46,68 @@ public class System {
     }
 
     /**
+     * System usage rate.
+     */
+    private static double rho = 0;
+    /**
      * Rho getter.
      * @return rho parameter
      */
     public static double getRho() {
         return rho;
     }
+
+    /**
+     * Buffer capacity.
+     */
+    private static int c = 0;
+    /**
+     * Buffer capacity getter.
+     * @return bufferState capacity
+     */
+    public static int getC() {
+        return c;
+    }
+    /**
+     * Buffer capacity setter.
+     * @param c buffer capacity
+     */
+    public static void setC(int c) {
+        if(c >= 0)
+            System.c = c;
+    }
+
+    /**
+     * Current buffer state.
+     */
+    private static int bufferState = 0;
+
+    /**
+     * Function increases buffer state.
+     */
+    public static void increaseBufferState() {
+        bufferState++;
+    }
+    /**
+     * Function decreases buffer state.
+     */
+    public static void decreaseBufferState() {
+        bufferState--;
+        if(bufferState < 0)
+            bufferState = 0;
+    }
+    /**
+     * Buffer state getter.
+     * @return current buffer state
+     */
+    public static int getBufferState() {
+        return bufferState;
+    }
+
+    /**
+     * True if system is busy (is handling an event).
+     */
+    public static boolean busy = false;
 
     /**
      * Sequence of the events in the system.
@@ -171,10 +219,12 @@ public class System {
      * @param lambda inflow intensity
      * @param mu service intensity
      */
-    public System(double lambda, double mu) {
+    public System(double lambda, double mu, int c) {
         setLambda(lambda);
         setMu(mu);
         rho = lambda/mu;
+
+        System.c = c;
 
         addEvent(new Event(Instant.ofEpochMilli(RandomGenerator.getNextExpDist(lambda)), Event.EventType.ARRIVAL));
     }

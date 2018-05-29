@@ -8,6 +8,7 @@ public class Statistics {
     private static double averageTimeToService = 0;
     private static double averageEventTime = 0;
     private static double averageNumberOfWaitingTasks = 0;
+    private static int numberOfRejectedArrivals = 0;
 
     public static void addToAverageNumberInSystem(long duration, int state) {
         averageNumberInSystem += duration * state;
@@ -38,6 +39,13 @@ public class Statistics {
         return numberOfArrivals + numberOfDepartures;
     }
 
+    public static int getNumberOfArrivals() { return numberOfArrivals; }
+    public static int getNumberOfRejectedArrivals() { return numberOfRejectedArrivals; }
+    public static double getPercentageOfRejectedArrivals() {
+        double result = ((double)numberOfRejectedArrivals)/((double)numberOfArrivals);
+        return result*100;
+    }
+
     public static void addToAverageTimeToService(long duration) {
         averageTimeToService += duration;
     }
@@ -51,4 +59,6 @@ public class Statistics {
     public static double getAverageEventTime() {
         return averageEventTime/numberOfArrivals;
     }
+
+    public static void increaseNumberOfRejectedArrivals() { numberOfRejectedArrivals++; }
 }
