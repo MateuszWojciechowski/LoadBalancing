@@ -13,7 +13,7 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(java.lang.System.in));
 
         java.lang.System.out.println("------------------------");
-        java.lang.System.out.println(" M/M/1 System Simulator ");
+        java.lang.System.out.println(" M/M/1/c System Simulator ");
         java.lang.System.out.println("------------------------");
 
         java.lang.System.out.println("Choose lambda parameter: ");
