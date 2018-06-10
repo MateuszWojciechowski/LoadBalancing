@@ -60,21 +60,21 @@ public class System {
     /**
      * Buffer capacity.
      */
-    private static int c = 0;
+    private static int bufferCapacity = 0;
     /**
      * Buffer capacity getter.
      * @return bufferState capacity
      */
-    public static int getC() {
-        return c;
+    public static int getBufferCapacity() {
+        return bufferCapacity;
     }
     /**
      * Buffer capacity setter.
-     * @param c buffer capacity
+     * @param bufferCapacity buffer capacity
      */
-    public static void setC(int c) {
-        if(c >= 0)
-            System.c = c;
+    public static void setBufferCapacity(int bufferCapacity) {
+        if(bufferCapacity >= 0)
+            System.bufferCapacity = bufferCapacity;
     }
 
     /**
@@ -219,12 +219,12 @@ public class System {
      * @param lambda inflow intensity
      * @param mu service intensity
      */
-    public System(double lambda, double mu, int c) {
+    public System(double lambda, double mu, int bufferCapacity) {
         setLambda(lambda);
         setMu(mu);
         rho = lambda/mu;
 
-        System.c = c;
+        System.bufferCapacity = bufferCapacity;
 
         addEvent(new Event(Instant.ofEpochMilli(RandomGenerator.getNextExpDist(lambda)), Event.EventType.ARRIVAL));
     }

@@ -9,7 +9,15 @@ public class RandomGenerator {
     /**
      * Instance of random numbers generator
      */
-    private static Random random = new Random();
+    private static Random random;
+
+    /**
+     * Pseudorandom generator seed setter
+     * @param seed pseudorandom generator seed
+     */
+    public static void setSeed(int seed) {
+        random = new Random(seed);
+    }
 
     /**
      * Function to generate exponential distribution random number.

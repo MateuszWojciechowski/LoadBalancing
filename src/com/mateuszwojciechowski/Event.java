@@ -75,7 +75,7 @@ public class Event implements Comparable {
              */
 
             //if buffer is full
-            if(System.getBufferState() >= System.getC()) {
+            if(System.getBufferState() >= System.getBufferCapacity()) {
                 java.lang.System.out.println("No place in buffer, event rejected!");
                 Statistics.increaseNumberOfRejectedArrivals();
                 Statistics.increaseNumberOfArrivals();

@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.time.Instant;
+import java.util.Random;
 
 public class Main {
     public static System system;
@@ -32,7 +33,7 @@ public class Main {
             java.lang.System.out.println(e.getMessage());
         }
 
-        java.lang.System.out.println("Choose c parameter (buffer capacity): ");
+        java.lang.System.out.println("Choose c parameter (system capacity): ");
         int c = 0;
         try {
             c = Integer.valueOf(br.readLine());
@@ -40,7 +41,16 @@ public class Main {
             java.lang.System.out.println(e.getMessage());
         }
 
-        system = new System(lambda, mu, c);
+        java.lang.System.out.println("Choose random generator seed: ");
+        int seed = 0;
+        try {
+            seed = Integer.valueOf(br.readLine());
+        } catch (IOException e) {
+            java.lang.System.out.println(e.getMessage());
+        }
+
+        RandomGenerator.setSeed(seed);
+        system = new System(lambda, mu, c-1);
 
         //Simulation loop
         while (Statistics.getNumberOfEvents() < 20000) {
@@ -76,9 +86,9 @@ public class Main {
 
         }
 
-        java.lang.System.out.println("----------------------");
-        java.lang.System.out.println(" Theoretical results: ");
-        java.lang.System.out.println("----------------------");
+        java.lang.System.out.println("---------------------------------------");
+        java.lang.System.out.println(" Theoretical results for M/M/1 system: ");
+        java.lang.System.out.println("---------------------------------------");
         java.lang.System.out.println("Average number of events in system: " + System.getRho() / (1 - System.getRho()));
         java.lang.System.out.println("Average number of waiting tasks in system: " + Math.pow(System.getRho(), 2) / (1 - System.getRho()));
         java.lang.System.out.println("Average service time: " + 1000 / (System.getMu() - System.getLambda()));
