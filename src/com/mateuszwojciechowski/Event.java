@@ -23,6 +23,8 @@ public class Event implements Comparable {
 
     private long eventDuration;
 
+    private int serverID;
+
     /**
      * Constructor of the event. If event type is ARRIVAL then it creates departure event.
      * @param startTime point in time when event occurs
@@ -34,10 +36,11 @@ public class Event implements Comparable {
         java.lang.System.out.println("NEW EVENT - start time: " + startTime.toString() + ", event type: " + eventType);
     }
 
-    public Event(Instant startTime, EventType eventType, long eventDuration) {
+    public Event(Instant startTime, EventType eventType, long eventDuration, int serverID) {
         this.eventStartTime = startTime;
         this.eventType = eventType;
         this.eventDuration = eventDuration;
+        this.serverID = serverID;
         java.lang.System.out.println("NEW EVENT - start time: " + startTime.toString() + ", event type: " + eventType);
     }
 
@@ -65,38 +68,50 @@ public class Event implements Comparable {
 
     public void process() {
         Statistics.addToAverageNumberInSystem(Duration.between(System.getPreviousEventTime(), eventStartTime).toMillis(), System.getNumberOfEventsInSystem());
-        System.decreaseTimeRemainingToEmptySystem(Math.abs(Duration.between(getEventStartTime(), System.getPreviousEventTime()).toMillis()));
-        java.lang.System.out.println("Time remaining to empty system: " + System.getTimeRemainingToEmptySystem() + "ms");
+        for(int i=0; i < System.getServersNum(); i++) {
+            System.getServer(i).addToAverage(Duration.between(System.getPreviousEventTime(), eventStartTime).toMillis());
+        }
         if(eventType == EventType.ARRIVAL) {
             /*
-            1. Check if buffer is not full.
-            1. Increase number of events in the system.
-            2. Generate departure event.
+            1. Find appropiate server (not overloaded)
+            2. Send there a request
              */
 
-            //if buffer is full
-            if(System.getBufferState() >= System.getBufferCapacity()) {
-                java.lang.System.out.println("No place in buffer, event rejected!");
-                Statistics.increaseNumberOfRejectedArrivals();
-                Statistics.increaseNumberOfArrivals();
-                return;
+            //Choose server which should handle the request
+            int i = 0;
+            int newServerID;
+            while(true) {
+                if(i == System.getServersNum()) {
+                    java.lang.System.out.println("Servers overloaded, request lost.");
+                    for(int j=0; j < System.getServersNum(); j++) {
+                        java.lang.System.out.println("Current server #" + j + " load: " + System.getServer(j).getLoad());
+                    }
+                    Statistics.increaseNumberOfRejectedArrivals();
+                    return;
+                }
+                newServerID = System.getNextServerID();
+                if(System.getServer(newServerID).getLoad() >= Server.getCapacity()) {
+                    java.lang.System.out.println("Server #" + newServerID + " overloaded.");
+                    System.setLastServerUsed(newServerID);
+                    i++;
+                }
+                else break;
             }
 
+            System.getServer(newServerID).increaseLoad();
+
+            java.lang.System.out.println("Request sent to server #" + newServerID);
+            java.lang.System.out.println("Current server #" + newServerID + " load: " + System.getServer(newServerID).getLoad());
+
             System.increaseNumberOfEventsInSystem();
-            if(System.busy == true)
-                System.increaseBufferState();
-            else
-                System.busy = true;
 
             long newEventDuration = RandomGenerator.getNextExpDist(System.getMu());
 
             Statistics.addToAverageEventTime(newEventDuration);
-            Statistics.addToAverageTimeToService(System.getTimeRemainingToEmptySystem());
             Statistics.increaseNumberOfArrivals();
 
             java.lang.System.out.println("Event duration: " + newEventDuration + "ms");
-            System.addEvent(new Event(Instant.ofEpochMilli(eventStartTime.toEpochMilli() + newEventDuration + System.getTimeRemainingToEmptySystem()), EventType.DEPARTURE, newEventDuration));
-            System.increaseTimeRemainingToEmptySystem(newEventDuration);
+            System.addEvent(new Event(Instant.ofEpochMilli(eventStartTime.toEpochMilli() + newEventDuration), EventType.DEPARTURE, newEventDuration, newServerID));
         }
         else {
             /*
@@ -106,11 +121,8 @@ public class Event implements Comparable {
              */
             Statistics.increaseNumberOfDepartures();
             System.decreaseNumberOfEventsInSystem();
-
-            if(System.getBufferState() == 0)
-                System.busy = false;
-            else
-                System.decreaseBufferState();
+            System.getServer(serverID).decreaseLoad();
+            java.lang.System.out.println("Current server #" + serverID + " load: " + System.getServer(serverID).getLoad());
         }
         java.lang.System.out.println("Events in system: " + System.getNumberOfEventsInSystem());
     }

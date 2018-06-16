@@ -1,6 +1,7 @@
 package com.mateuszwojciechowski;
 
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.LinkedList;
 
 /**
@@ -58,57 +59,42 @@ public class System {
     }
 
     /**
-     * Buffer capacity.
-     */
-    private static int bufferCapacity = 0;
-    /**
-     * Buffer capacity getter.
-     * @return bufferState capacity
-     */
-    public static int getBufferCapacity() {
-        return bufferCapacity;
-    }
-    /**
-     * Buffer capacity setter.
-     * @param bufferCapacity buffer capacity
-     */
-    public static void setBufferCapacity(int bufferCapacity) {
-        if(bufferCapacity >= 0)
-            System.bufferCapacity = bufferCapacity;
-    }
-
-    /**
-     * Current buffer state.
-     */
-    private static int bufferState = 0;
-
-    /**
-     * Function increases buffer state.
-     */
-    public static void increaseBufferState() {
-        bufferState++;
-    }
-    /**
-     * Function decreases buffer state.
-     */
-    public static void decreaseBufferState() {
-        bufferState--;
-        if(bufferState < 0)
-            bufferState = 0;
-    }
-    /**
-     * Buffer state getter.
-     * @return current buffer state
-     */
-    public static int getBufferState() {
-        return bufferState;
-    }
-
-    /**
      * True if system is busy (is handling an event).
      */
     public static boolean busy = false;
 
+    private static int serversNum = 0;
+    public static void setServersNum(int serversNum) {
+        System.serversNum = serversNum;
+    }
+    public static int getServersNum() {
+        return serversNum;
+    }
+
+    /**
+     * ID of server which was used to handle the previous request
+     */
+    private static int lastServerUsed = 0;
+
+    public static int getLastServerUsed() {
+        return lastServerUsed;
+    }
+
+    public static int getNextServerID() {
+        if(lastServerUsed == serversNum - 1)
+            return 0;
+        else
+            return lastServerUsed + 1;
+    }
+    public static void setLastServerUsed(int lastServerUsed) {
+        System.lastServerUsed = lastServerUsed;
+    }
+
+    private static ArrayList<Server> serversList = new ArrayList<>();
+
+    public static Server getServer(int id) {
+        return serversList.get(id);
+    }
     /**
      * Sequence of the events in the system.
      */
@@ -199,32 +185,20 @@ public class System {
         return previousEventTime;
     }
 
-    private static long timeRemainingToEmptySystem = 0;
-
-    public static long getTimeRemainingToEmptySystem() {
-        return timeRemainingToEmptySystem;
-    }
-
-    public static void increaseTimeRemainingToEmptySystem(long additionalTime) {
-        System.timeRemainingToEmptySystem += additionalTime;
-    }
-
-    public static void decreaseTimeRemainingToEmptySystem(long time) {
-        System.timeRemainingToEmptySystem -= time;
-        if(timeRemainingToEmptySystem < 0)
-            timeRemainingToEmptySystem = 0;
-    }
     /**
      * Constructor with lambda and mu parameters
      * @param lambda inflow intensity
      * @param mu service intensity
      */
-    public System(double lambda, double mu, int bufferCapacity) {
+    public System(double lambda, double mu, int serversNum) {
         setLambda(lambda);
         setMu(mu);
         rho = lambda/mu;
+        setServersNum(serversNum);
 
-        System.bufferCapacity = bufferCapacity;
+        for(int i=0; i < serversNum; i++) {
+            serversList.add(new Server(i));
+        }
 
         addEvent(new Event(Instant.ofEpochMilli(RandomGenerator.getNextExpDist(lambda)), Event.EventType.ARRIVAL));
     }

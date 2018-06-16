@@ -61,4 +61,6 @@ public class Statistics {
     }
 
     public static void increaseNumberOfRejectedArrivals() { numberOfRejectedArrivals++; }
+
+    public static double getSimulationTime() { return simulationTime; }
 }

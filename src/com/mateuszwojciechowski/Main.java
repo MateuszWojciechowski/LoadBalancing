@@ -14,7 +14,7 @@ public class Main {
         BufferedReader br = new BufferedReader(new InputStreamReader(java.lang.System.in));
 
         java.lang.System.out.println("------------------------");
-        java.lang.System.out.println(" M/M/1/c System Simulator ");
+        java.lang.System.out.println(" Load Balancing Simulator ");
         java.lang.System.out.println("------------------------");
 
         java.lang.System.out.println("Choose lambda parameter: ");
@@ -33,7 +33,15 @@ public class Main {
             java.lang.System.out.println(e.getMessage());
         }
 
-        java.lang.System.out.println("Choose c parameter (system capacity): ");
+        java.lang.System.out.println("Choose number of servers: ");
+        int servers = 0;
+        try {
+            servers = Integer.valueOf(br.readLine());
+        } catch (IOException e) {
+            java.lang.System.out.println(e.getMessage());
+        }
+
+        java.lang.System.out.println("Choose c parameter (single server capacity): ");
         int c = 0;
         try {
             c = Integer.valueOf(br.readLine());
@@ -50,7 +58,8 @@ public class Main {
         }
 
         RandomGenerator.setSeed(seed);
-        system = new System(lambda, mu, c-1);
+        system = new System(lambda, mu, servers);
+        Server.setCapacity(c);
 
         //Simulation loop
         while (Statistics.getNumberOfEvents() < 20000) {
@@ -83,16 +92,16 @@ public class Main {
             java.lang.System.out.println("Number of rejected arrivals: " + Statistics.getNumberOfRejectedArrivals());
             java.lang.System.out.println("% rejected arrivals: " + Statistics.getPercentageOfRejectedArrivals());
             java.lang.System.out.println("Handled events: " + Statistics.getNumberOfEvents());
+            printServersStats();
 
         }
+    }
 
-        java.lang.System.out.println("---------------------------------------");
-        java.lang.System.out.println(" Theoretical results for M/M/1 system: ");
-        java.lang.System.out.println("---------------------------------------");
-        java.lang.System.out.println("Average number of events in system: " + System.getRho() / (1 - System.getRho()));
-        java.lang.System.out.println("Average number of waiting tasks in system: " + Math.pow(System.getRho(), 2) / (1 - System.getRho()));
-        java.lang.System.out.println("Average service time: " + 1000 / (System.getMu() - System.getLambda()));
-        java.lang.System.out.println("Average time to service: " + System.getRho() * 1000 / (System.getMu() - System.getLambda()));
-        java.lang.System.out.println("Average event time: " + Statistics.getAverageEventTime());
+    private static void printServersStats() {
+        for(int i=0; i < System.getServersNum(); i++) {
+            java.lang.System.out.println("Average server #" + i + " load: " + System.getServer(i).getAverageLoad()*100/Server.getCapacity() + "%");
+            java.lang.System.out.println("Server #" + i + " handled requests: " + System.getServer(i).getHandledRequests());
+
+        }
     }
 }
